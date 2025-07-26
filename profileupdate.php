@@ -14,10 +14,37 @@ $username = $row['username'];
 $email = $row['email'];
 $password = $row['password'];
 
-// echo $id;
-// echo $username;
-// echo $email;
-// echo $password;
+if(isset($_POST['submit'])){
+
+    $username = $_POST['username'];
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+   
+    
+    $sql = "update `usersdata`.`users` set 
+    `username` = '$username',
+    `email` = '$email',
+    `password` = '$password'
+    where `users`.`id` = '$id'";
+
+  $result =  mysqli_query($connect, $sql);
+
+  if($result){
+      echo "
+        <script>
+            alert('Update has been submitted');
+            window.location.href = 'display.php';
+        </script>
+
+      ";
+    //   header('location: display.php');
+  }else{
+    die(mysqli_connect_error());
+  }
+
+  mysqli_close($connect);
+
+}
 
 
 
@@ -71,27 +98,30 @@ $password = $row['password'];
       </div>
 
       <div class="card-body">
-        <div class="alert alert-success success-message" id="successMsg">
+        <!-- <div class="alert alert-success success-message" id="successMsg">
           ✅ Your profile was updated successfully!
-        </div>
+        </div> -->
 
-        <form id="profileForm">
+        <form id="profileForm" method="post">
           <div class="mb-3">
             <label for="username" class="form-label">Full Name</label>
-            <input type="text" class="form-control" id="username" value=<?php echo $username?> required>
+            <input type="text" class="form-control" name="username" id="username" value=<?php echo $username?>>
+            <div class="invalid-feedback">Please enter your name.</div>
           </div>
 
           <div class="mb-3">
             <label for="email" class="form-label">Email Address</label>
-            <input type="email" class="form-control" id="email" value=<?php echo $email?> required>
+            <input type="email" class="form-control" name="email" id="email" value=<?php echo $email?> >
+            <div class="invalid-feedback">Please enter a valid email.</div>
           </div>
 
           <div class="mb-3">
             <label for="password" class="form-label">Password</label>
-            <input type="text" class="form-control" id="password" value=<?php echo $password?> required>
+            <input type="text" class="form-control" name="password" id="password" value=<?php echo $password?>>
+            <div class="invalid-feedback">Password must be at least 6 characters.</div>
           </div>
 
-          <button type="submit" class="btn btn-primary w-100">💾 Save Changes</button>
+          <button type="submit" name="submit" class="btn btn-primary w-100">💾 Save Changes</button>
         </form>
       </div>
     </div>
@@ -102,23 +132,47 @@ $password = $row['password'];
 
   <!-- Custom JS -->
   <script>
-    document.getElementById('profileForm').addEventListener('submit', function(e) {
-      e.preventDefault();
+  document.getElementById('profileForm').addEventListener('submit', function (e) {
+   // e.preventDefault();
+   let isValid = true;
 
-      // Simulate saving and update profile name
-      const name = document.getElementById('username').value;
-      document.getElementById('profileName').innerText = name;
+    const username = document.getElementById('username');
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
 
-      // Show success message
-      const msg = document.getElementById('successMsg');
-      msg.style.display = 'block';
 
-      // Auto-hide after 3 seconds
-      setTimeout(() => {
-        msg.style.display = 'none';
-      }, 3000);
+    // Reset previous states
+    [username, email, password].forEach(field => {
+      field.classList.remove('is-invalid');
     });
-  </script>
+
+    // Validate Username
+    if (username.value.trim() === '') {
+      username.classList.add('is-invalid');
+      isValid = false;
+    }
+
+    // Validate Email
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email.value.trim())) {
+      email.classList.add('is-invalid');
+      isValid = false;
+    }
+
+    // Validate Password
+    if (password.value.trim().length < 6) {
+      password.classList.add('is-invalid');
+      isValid = false;
+    }
+
+     if (!isValid) {
+      e.preventDefault(); // prevent form from submitting
+    }
+
+
+  });
+</script>
+
 
 </body>
 
